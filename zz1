@@ -1,0 +1,543 @@
+# import flwr as fl
+import threading
+import math
+# import mxnet as mx
+# from mxnet import nd, autograd, gluon
+# import numpy as np
+# from copy import deepcopy
+# import time
+# from sklearn.metrics import roc_auc_score
+# from keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Dense
+import pygad.kerasga
+import time
+import sys
+# import numpy as np
+import random
+import string
+import socket
+import tensorflow as tf
+from tensorflow import keras
+import sys
+# import seaborn as sns
+import matplotlib.pyplot as plt
+# from numpy import average
+# from numpy import array
+import pickle
+# from noknow.core import ZK, ZKSignature, ZKParameters, ZKData, ZKProof
+import pandas as pd
+# from numpy import genfromtxt
+import matplotlib.pyplot as plt
+# from numpy.random import multivariate_normal
+# Synthetic dataset
+# from sklearn.datasets import make_classification
+# Data processing
+import pandas as pd
+import numpy as np
+# from collections import Counter
+# Visualization
+import matplotlib.pyplot as plt
+# import seaborn as sns
+# Model and performance
+import tensorflow as tf
+from tensorflow.keras import layers, losses
+# from sklearn.model_selection import train_test_split
+# from sklearn.metrics import classification_report
+# from sklearn.metrics import f1_score
+# from tensorflow.keras.optimizers import Adam
+
+
+
+
+# def getData(dist, x, y):
+#     dx = []
+#     dy = []
+#     counts = [0 for i in range(10)]
+#     for i in range(len(x)):
+#         if counts[y[i]] < dist[y[i]]:
+#             dx.append(x[i])
+#             dy.append(y[i])
+#             counts[y[i]] += 1
+
+#     return np.array(dx), np.array(dy)
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import keras
+from keras.models import Sequential
+from keras.datasets import mnist
+from keras.layers import Dense
+from keras.optimizers import Adam
+import os 
+
+# Insert code at beginning of script to load score from backup
+dir_path = 'C:/Users/ASAU/OneDrive/Desktop'
+back_up = os.path.join(dir_path, 'backup.txt')
+models = os.path.join(dir_path, 'models.txt')
+#because of multiclass datasets
+from keras.utils.np_utils import to_categorical 
+import random
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+assert(x_train.shape[0] == y_train.shape[0]), "The number of images is not equal .."
+assert(x_test.shape[0] == y_test.shape[0]), "The number of images is not equal .."
+assert(x_train.shape[1:] == (28, 28)), "The dimension of the images are not 28x28"
+assert(x_test.shape[1:] == (28, 28))
+num_of_samples = []
+
+cols = 5
+num_of_classes = 10
+
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10) 
+x_train = x_train/255 
+x_test = x_test/255
+num_pixels = 784
+x_train = x_train.reshape(x_train.shape[0],
+                         num_pixels)
+x_test = x_test.reshape(x_test.shape[0],
+                         num_pixels)
+# print(x_train.shape)
+def create_model():
+    model = Sequential()
+    model.add(Dense(10, input_dim = num_pixels,
+                    activation = 'relu'))
+    model.add(Dense(30, activation='relu'))
+    model.add(Dense(10, activation='relu'))
+    model.add(Dense(num_of_classes, activation='softmax'))
+    model.compile(Adam(lr=0.01),
+                    loss='categorical_crossentropy',
+                metrics=['accuracy'])
+    return model           
+     
+
+globalmodel = create_model()
+# print(model.summary())
+# history = model.fit(x_train, y_train, validation_split=0.1,
+#          epochs=10, batch_size=200, verbose=1, shuffle=1)
+
+score = globalmodel.evaluate(x_test, y_test, verbose=0)
+print(type(score))
+print('Test Score:', score[0])
+print('Test Accuracy:', score[1])
+
+class SocketThread(threading.Thread):
+
+    def __init__(self, buffer_size, port,i):
+        threading.Thread.__init__(self)
+        self.buffer_size = buffer_size
+        self.port=port
+        self.soc = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+        self.soc.bind(("192.168.56.1" , self.port))
+        print("Socket is bound to an address & port number.")
+        self.soc.listen(1)
+        self.connection, client_info = self.soc.accept()
+        print("Running a Thread for the Connection with client")
+        print(self.port)
+        self.std=std
+        # self.lg=lg
+        # self.m=m
+        self.i=i
+        self.new_weights=[]
+    
+        
+
+    def run(self):
+       
+        
+
+        # This while loop allows the server to wait for the client to send data more than once within the same connection.
+        while True:
+            received_data = self.recv()
+            self.reply(received_data)
+            
+
+            # print(received_data)
+            
+
+    def recv(self):
+        print("nnnn")
+        received_data = b""
+        while True:
+            try:
+                data = self.connection.recv(self.buffer_size)
+                received_data = data
+                
+                if len(received_data) > 0:
+                    print('hnn')
+                    try:
+                        # Decoding the data (bytes).
+                        received_data = pickle.loads(received_data)
+                        # Returning the decoded data.
+                        return received_data
+
+                    except BaseException as e:
+                        print("Error Decoding the Client's Data:")
+                        return
+
+                # else:
+                #     # In case data are received from the client, update the recv_start_time to the current time to reset the timeout counter.
+                #     self.recv_start_time = time.time()
+
+            except BaseException as e:
+                print("Error Receiving Data from the Client: ")
+                return
+
+        #return received_data
+
+    def reply(self, received_data):
+        global keras_ga,data_inputs, data_outputs,globalmodel
+        # if (("data" in received_data.keys()) and ("subject" in received_data.keys())):
+        #     subject = received_data["subject"]
+        #  msg_model = received_data
+            # print("Client's Message Subject is {subject}.".format(subject=subject))
+    
+        print("Replying to the Client.")
+        if received_data is None:
+            print("nothong received from client")
+            # data_dict = {"population_weights": keras_ga.population_weights,
+            #                 "model_json": globalmodel.to_json(),
+            #                 "num_solutions": keras_ga.num_solutions}
+            # data = {"subject": "model", "data": data_dict}
+        else:
+            score = globalmodel.evaluate(x_test, y_test, verbose=0)
+            print(type(score))
+            print('Test Score:', score[0])
+            print('Test Accuracy:', score[1])
+            if score[1] == 1.0:
+                print("model is updated correctly")
+                self.soc.close()
+                return
+            else:
+                try:
+                    response = pickle.dumps(globalmodel)
+                    self.model_averaging(globalmodel, received_data)
+                except BaseException as e:
+                    print("Error Encoding the Message: {msg}.\n".format(msg=e))
+        score = globalmodel.evaluate(x_test, y_test, verbose=0)
+        print('Test Score:', score[0])
+        print('Test Accuracy:', score[1])
+        if score[1] != 1.0:
+
+            response = pickle.dumps(globalmodel)
+            self.model_averaging(globalmodel, received_data)
+            print("done")
+        else:
+            self.soc.close()
+            print("done")
+            return
+        try:
+            self.connection.sendall(response)
+        except BaseException as e:
+            print("Error Sending Data to the Client: {msg}.\n".format(msg=e))
+    
+
+    def model_averaging(self, model, received):
+        model_weights_vector = pygad.kerasga.model_weights_as_vector(model=model)
+        model_weights_matrix = pygad.kerasga.model_weights_as_matrix(model=model,
+                                                                     weights_vector=model_weights_vector)
+        best_model_weights_vector = pygad.kerasga.model_weights_as_vector(model=received)
+        best_model_weights_matrix = pygad.kerasga.model_weights_as_matrix(model=received,weights_vector=best_model_weights_vector)
+       
+        
+        new_weights = np.array(len(model_weights_matrix)*2)
+        best=np.array(len(best_model_weights_matrix))
+        for i in range(0,len((model_weights_matrix))):
+            new_weights=np.append(new_weights,model_weights_matrix[i])
+        for i in range(0,len((best_model_weights_matrix))):
+            best=np.append(best,best_model_weights_matrix[i])
+        wts=np.array(len(model_weights_matrix))
+        for idx, arr in enumerate(model_weights_matrix):
+            x=new_weights[idx]
+            l=x+best[idx]
+            x=l/2
+            wts=np.append(wts,x)
+        W=wts=np.array(len(wts)*2)
+        # f=new_weights.reshape(30,10)
+        # b=best.reshape(30,10)
+        try:
+            new_wei = model_weights_matrix
+            for idx, arr in enumerate(new_wei):
+                new_wei[idx] = new_wei[idx] + best_model_weights_matrix[idx]
+                new_wei[idx] = new_wei[idx] / 2
+            self.new_weights=new_wei
+            globalmodel.set_weights(weights=new_wei)
+            # print(type(new_wei))
+            for i in new_wei:
+                print(type(i))
+                i=str(i)
+                with open(models, 'w') as w:
+                    w.write(new_wei + '\n')
+        except:
+            print("client",self.i,"is malicious")
+            self.soc.close()
+            lock = threading.Lock()
+            lock.acquire()
+                
+                # if p==5680:
+                #     print("client 1")
+            # self.soc.close()
+        
+        
+            # new_weights[idx]= new_weights[idx]+best[idx]
+        # print("lenght",len(new_weights))
+        # print(wts)
+
+        N=10
+        h=np.array(len(model.get_weights()))
+        for i in range(0, len(model.get_weights()) // N):
+        
+            # getting incremented chunks
+            h.append(model.get_weights()[0: (i + 1) * N])
+        x=np.array(len(model.get_weights()))
+        zip_object = zip(wts, model.get_weights())
+
+        for i, k in zip_object:
+            x=np.append(x,i - k)
+        # print(x)
+        x=np.matrix(x)
+        def determinant_recursive(A, total=0):
+    # Section 1: store indices in list for row referencing
+            indices = list(range(len(A)))
+     
+    # Section 2: when at 2x2 submatrices recursive calls end
+            if len(A) == 2 and len(A[0]) == 2:
+                val = A[0][0] * A[1][1] - A[1][0] * A[0][1]
+                return val
+        
+            # Section 3: define submatrix for focus column and 
+            #      call this function
+            for fc in indices: # A) for each focus column, ...
+                # find the submatrix ...
+                As = A # B) make a copy, and ...
+                As = As[1:] # ... C) remove the first row
+                height = len(As) # D) 
+        
+                for i in range(height): 
+                    # E) for each remaining row of submatrix ...
+                    #     remove the focus column elements
+                    As[i] = As[i][0:fc] + As[i][fc+1:] 
+        
+                sign = (-1) ** (fc % 2) # F) 
+                # G) pass submatrix recursively
+                sub_det = determinant_recursive(As)
+                # H) total all returns from recursion
+                total += sign * A[0][fc] * sub_det 
+        
+            return total
+        z=determinant_recursive(x, total=0)
+        print(len(x))
+        h=np.add(h,z)
+        # c=np.array(len(x))
+        # for i in range(0,len(x)):
+        #     c=np.append(x[i]*h[i])
+        g=model=+h
+  
+        print(len(wts))
+        
+                # print("client:",self.i)
+                # p=self.port
+                # # self.port=self.port+1s
+                # b=self.port+1
+                # listenThread = SocketThread(buffer_size=1024*1024*1024,
+                #                                     port=b,std=self.std,lg=self.lg,m=self.m,i=self.i+1)
+                
+                # if p==5680:
+                #     print("client 1")
+            # self.soc.close()
+    
+        dist=np.linalg.norm(new_weights-best)
+        print("distance:" ,dist)
+        distance=str(dist)
+        with open(back_up, 'w') as w:
+            w.write(distance)
+        # pickle.dump(dist,open("save.p","wb"))
+        # td=self.std
+        # d1=np.append(td,dist)
+        # p=self.port
+        # for self.i in range(2):
+        #     # self.soc.close()
+        #     print("client:",self.i)
+        #     # self.port=self.port+1
+        #     b=self.port+1
+        #     listenThread = SocketThread(buffer_size=1024*1024*1024,
+        #                                         port=b,std=d1,lg=self.lg,m=self.m,i=self.i+1)
+            
+
+
+        # s=np.std(d1, axis = 0)
+        # for i in range(len(s)):
+        #     # print(s[i])
+        #     if s[i]<self.m:
+        #         self.m=s[i]
+        #     if s[i]>self.lg:
+        #         self.lg=s[i]
+        # s=np.std(std, axis = 0)
+        # if p==5680:
+        #     print("client 1")
+        
+        # lock = threading.Lock()
+        # lock.acquire()
+        # stop=threading
+        # if dist>self.lg:
+        #     print("malicious client")
+        #     self.soc.close()
+        # elif dist<self.getNamem:
+        #     print("malicious client")
+        #     self.soc.close()
+        # else:
+        #     print("client is un malicious")
+    def distancex(self):
+        # x=pickle.load(open("save.p","rb"))
+        if os.path.isfile(back_up):
+            with open(back_up, 'r') as r:
+                score = r.read()
+                return score
+    def full_aggregation(self,b):
+        if b:
+            try:
+                if os.path.isfile(models):
+                    with open(models, 'r') as r:
+                        
+                        new_weights = float([line.rstrip('\n') for line in r])
+                
+                        globalmodel.set_weights(weights=new_weights)
+                        return True
+            except:
+                pass
+                # print("malicious client")
+                # # for self.i in range(2):
+                # self.soc.close()
+                # lock = threading.Lock()
+                # lock.acquire()
+                # return False
+        # else:
+        #     print("malicious client")
+        #         # for self.i in range(2):
+        #     self.soc.close()
+        #     lock = threading.Lock()
+        #     lock.acquire()
+        #     return False
+
+
+        
+port= 5680
+
+m=100
+lg=0
+std=[]
+listenThread = SocketThread(buffer_size=1024*1024*1024,
+                                port=5680,i=1)
+listenThread.start()
+d1=listenThread.distancex()
+d1=float(d1)
+listenThread2 = SocketThread(buffer_size=1024*1024*1024,
+                                port=5681,i=2)
+listenThread2.start()
+d2=listenThread2.distancex()
+d2=float(d2)
+listenThread3 = SocketThread(buffer_size=1024*1024*1024,
+                                port=5682,i=3)
+    # port+=1
+listenThread3.start()
+d3=listenThread3.distancex()
+d3=float(d3)
+listenThread4 = SocketThread(buffer_size=1024*1024*1024,
+                                port=5683,i=4)
+    # port+=1
+listenThread4.start()
+d4=listenThread4.distancex()
+d4=float(d4)
+listenThread5 = SocketThread(buffer_size=1024*1024*1024,
+                                port=5684,i=5)
+    # port+=1
+listenThread5.start()
+d5=listenThread5.distancex()
+d5=float(d5)
+listenThread6 = SocketThread(buffer_size=1024*1024*1024,
+                                port=5685,i=6)
+    # port+=1
+listenThread6.start()
+d6=listenThread6.distancex()
+d6=float(d6)
+
+listenThread7 = SocketThread(buffer_size=1024*1024*1024,
+                                port=5686,i=7)
+listenThread7.start()
+d7=listenThread7.distancex()
+d7=float(d7)
+
+listenThread8 = SocketThread(buffer_size=1024*1024*1024,
+                                port=5687,i=8)
+listenThread8.start()
+d8=listenThread8.distancex()
+d8=float(d8)
+
+std=np.append(std,d1)
+std=np.append(std,d2)
+std=np.append(std,d3)
+std=np.append(std,d4)
+std=np.append(std,d5)
+std=np.append(std,d6)
+std=np.append(std,d7)
+std=np.append(std,d8)
+stdx=np.std(std,axis=0)
+print(stdx)
+
+for i in range(len(std)):
+
+    if std[i]<m:
+        m=std[i]
+    if std[i]>lg:
+        lg=std[i]
+if d1 > lg+stdx or d1 < m-stdx:
+    b=False
+    print("client 1 is malicious")
+else:
+    b=True
+    listenThread.full_aggregation(b)
+if d2 > lg+stdx or d2 < m-stdx:
+    b=False
+    print("client 2 is malicious")
+else:
+    b=True
+    listenThread2.full_aggregation(b)
+if d3 > lg+stdx or d3 < m-stdx:
+    b=False
+    print("client 3 is malicious outlying distance")
+else:
+    b=True
+    listenThread3.full_aggregation(b)
+if d4 > lg+stdx or d4 < m-stdx:
+    b=False
+    print("client 4 is malicious outlying distance")
+else:
+    b=True
+    listenThread3.full_aggregation(b)
+
+if d5 > lg+stdx or d5 < m-stdx:
+    b=False
+    print("client 5 is malicious outlying distance")
+else:
+    b=True
+    listenThread3.full_aggregation(b)
+if d6 > lg+stdx or d6 < m-stdx:
+    b=False
+    print("client 6 is malicious outlying distance")
+else:
+    b=True
+    listenThread3.full_aggregation(b)
+if d7 > lg+stdx or d7 < m-stdx:
+    b=False
+    print("client 7 is malicious outlying distance")
+else:
+    b=True
+    listenThread3.full_aggregation(b)
+if d8 > lg+stdx or d8 < m-stdx:
+    b=False
+    print("client 8 is malicious outlying distance")
+else:
+    b=True
+    listenThread3.full_aggregation(b)
+
